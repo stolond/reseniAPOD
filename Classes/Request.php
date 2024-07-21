@@ -2,25 +2,24 @@
 
 class Request
 {
-    public function remaining_requests() {
+    public function get_ratelimit_info($start_date, $end_date) {
 
-        $key = "fCjpNqkghLpl6bIkdeTcOvpBHAWTQFv4rOelBvUL";
-        $url = "https://api.nasa.gov/planetary/apod?api_key=" . $key;
-        $curl = curl_init($url);
+        $rate_limit = [];
+        $url = $this->prep_url($start_date, $end_date);
+        $ch = curl_init($url);
 
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_HEADER, true);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HEADER, true);
 
-        $response = curl_exec($curl);
-        echo $response;
+        $response = curl_exec($ch);
 
-        $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+        $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
         $headers = substr($response, 0, $header_size);
-
-        curl_close($curl);
+        $body = substr($response, $header_size);
 
         $header_lines = explode("\r\n", $headers);
         $header_array = [];
+
         foreach ($header_lines as $line) {
             $parts = explode(": ", $line);
             if (count($parts) == 2) {
@@ -28,27 +27,53 @@ class Request
             }
         }
 
-        if(isset($header_array["x-ratelimit-remaining"])) {
-            $rate_remaining = $header_array["x-ratelimit-remaining"];
-            return $rate_remaining;
+        if (isset($header_array["x-ratelimit-remaining"]) && isset($header_array["x-ratelimit-limit"])) {
+            $rate_limit[0] = $header_array["x-ratelimit-limit"];
+            $rate_limit[1] = $header_array["x-ratelimit-remaining"];
+            return $rate_limit;
         } else {
-            return "?";
+            
+            $rate_limit[0] = "?";
+            $rate_limit[1] = "?";
+            return $rate_limit;
+        }
+        
+        /*
+        $body_data = json_decode($body, true);
+
+        if ($body_data === NULL) {
+            die("decoding error");
         }
 
+        $csv_file = "apod_data.csv";
+
+        $file = fopen($csv_file, "a"); 
+
+        if ($file === FALSE) {
+            die("Error occurred while opening the CSV file for writing.");
+        }
+
+        if (is_array($body_data)) {
+            foreach ($body_data as $key => $value) {
+                if (is_array($value) || is_object($value)) {
+                    $value = json_encode($value);
+                }
+                fputcsv($file, [$key, $value]);
+                if (fputcsv($file, [$key, $value]) === false) {
+                    die('Error writing to the CSV file.');
+                }
+            }
+        }
+
+        fclose($file);
+        */
     }
 
-    public function request_from_to($date_from, $date_to){
-        $response = file_get_contents("https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY");
-
-
-        return $response;
-    }
-
-    public function request_exact($date_from, $date_to){
-        $response = file_get_contents("https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY");
-
-
-        return $response;
+    private function prep_url($start_date, $end_date) {
+        $key = "fCjpNqkghLpl6bIkdeTcOvpBHAWTQFv4rOelBvUL";
+        $url = "https://api.nasa.gov/planetary/apod?start_date=" . $start_date . "&end_date=" . $end_date . "&api_key=" . $key;
+        
+        return $url;
     }
 }
 
