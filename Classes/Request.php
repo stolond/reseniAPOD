@@ -24,21 +24,21 @@ Class Request
         $headers = ["date", "title", "media_type", "hdurl", "url"];
         $csv_file = "apod_data.csv";
 
-        $filtered_data = array_intersect_key($body_data, array_flip($headers));
-
         $file = fopen($csv_file, "a"); 
 
         if ($file === false) {
-            die("Error opening file: " . $csv_file);
+            die("Error opening file");
         }
 
-        // if file doesnt exist write header row
         if (ftell($file) == 0) {
-            fputcsv($file, array_keys($filtered_data));
+            fputcsv($file, $headers);
         }
 
-        if (fputcsv($file, $filtered_data) === false) {
-            die('Error writing to the CSV file.');
+        foreach ($body_data as $record) {
+            $filtered_data = array_intersect_key($record, array_flip($headers));
+            if (fputcsv($file, $filtered_data) === false) {
+                die("Error writing to file.");
+            }
         }
 
         fclose($file);

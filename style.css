@@ -3,12 +3,12 @@
 }
 
 body {
-    background-color: dimgray;
+    background-color: rgb(75, 75, 75);
     text-align: center;
 }
 
 .container {
-    background-color: grey;
+    background-color: rgb(112, 112, 112);
     margin: auto;
     position: absolute;
     top: 50%;
@@ -26,7 +26,6 @@ body {
     height: 3em;
     margin-bottom: 1em;
     align-items: center;
-    justify-content: center;
     text-align: center;
     display: flex;
     border-radius: 25px;
