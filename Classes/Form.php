@@ -9,6 +9,7 @@ Class Form
     }
 
     public function validate_form(){
+
         $this->validate_radio();
 
         if (isset($this->data["radio_choice"])) {
@@ -25,7 +26,7 @@ Class Form
     {
         if (empty($this->data["radio_choice"])) 
         {
-            $this->errors["radio_choice"] = "Please select a lookup option.";
+            $this->errors["radio_choice"] = "Please select a lookup method.";
         }
     }
 
@@ -60,10 +61,6 @@ Class Form
         }
     }
 
-    public function get_errors() {
-        return $this->errors;
-    }
-
     public function calculate_date($start_date, $duration){
         $date = new DateTime($start_date);
         $date->modify("+ " . $duration . " days");
@@ -76,6 +73,10 @@ Class Form
         } else {
             return $date_to;
         }
+    }
+
+    public function get_errors() {
+        return $this->errors;
     }
 }
  

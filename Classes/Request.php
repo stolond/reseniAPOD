@@ -1,10 +1,7 @@
 <?php 
-
-class Request
+Class Request
 {
-    public function get_ratelimit_info($start_date, $end_date) {
-
-        $rate_limit = [];
+    public function exec_request($start_date, $end_date) {
         $url = $this->prep_url($start_date, $end_date);
         $ch = curl_init($url);
 
@@ -14,12 +11,45 @@ class Request
         $response = curl_exec($ch);
 
         $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-        $headers = substr($response, 0, $header_size);
+        $header = substr($response, 0, $header_size);
         $body = substr($response, $header_size);
 
-        $header_lines = explode("\r\n", $headers);
-        $header_array = [];
+        $this->save_to_csv($body);
+        $ratelimits = $this->get_ratelimits($header);
+        return $ratelimits;
+    }
 
+    private function save_to_csv($data) {
+        $body_data = json_decode($data, true);
+        $headers = ["date", "title", "media_type", "hdurl", "url"];
+        $csv_file = "apod_data.csv";
+
+        $filtered_data = array_intersect_key($body_data, array_flip($headers));
+
+        $file = fopen($csv_file, "a"); 
+
+        if ($file === false) {
+            die("Error opening file: " . $csv_file);
+        }
+
+        // if file doesnt exist write header row
+        if (ftell($file) == 0) {
+            fputcsv($file, array_keys($filtered_data));
+        }
+
+        if (fputcsv($file, $filtered_data) === false) {
+            die('Error writing to the CSV file.');
+        }
+
+        fclose($file);
+    }
+
+    private function get_ratelimits($data) {
+        //display rate limits
+        $rate_limit = [];
+        $header_array = [];
+        $header_lines = explode("\r\n", $data);
+        
         foreach ($header_lines as $line) {
             $parts = explode(": ", $line);
             if (count($parts) == 2) {
@@ -37,36 +67,6 @@ class Request
             $rate_limit[1] = "?";
             return $rate_limit;
         }
-        
-        /*
-        $body_data = json_decode($body, true);
-
-        if ($body_data === NULL) {
-            die("decoding error");
-        }
-
-        $csv_file = "apod_data.csv";
-
-        $file = fopen($csv_file, "a"); 
-
-        if ($file === FALSE) {
-            die("Error occurred while opening the CSV file for writing.");
-        }
-
-        if (is_array($body_data)) {
-            foreach ($body_data as $key => $value) {
-                if (is_array($value) || is_object($value)) {
-                    $value = json_encode($value);
-                }
-                fputcsv($file, [$key, $value]);
-                if (fputcsv($file, [$key, $value]) === false) {
-                    die('Error writing to the CSV file.');
-                }
-            }
-        }
-
-        fclose($file);
-        */
     }
 
     private function prep_url($start_date, $end_date) {

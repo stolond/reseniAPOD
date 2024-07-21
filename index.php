@@ -11,19 +11,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $time_from = $_POST["period_from"];
         $time_to = $_POST["period_to"];
 
-        echo "Form is valid!<br>";
+        echo "<p class='valid'>Form is valid.</p><br>";
 
         $req = new Request();
-        //$data = $req->get_data($time_from, $time_to);
-        $limit = $req->get_ratelimit_info($time_from, $time_to);
+        $limits = $req->exec_request($time_from, $time_to);
 
-        echo "<h3>Request limit: " . $limit[0] . " per hour</h3>";
-        echo "<h3>Remaining requests: " . $limit[1]. "</h3>";
+        echo "<h4>Request limit: " . $limits[0] . " per hour</h4>";
+        echo "<h4>Remaining requests: " . $limits[1]. "</h4>";
 
     } else {
         $errors = $validator->get_errors();
         foreach ($errors as $field => $error) {
-            echo "<p class='error'>Error in $field: $error</p>";
+            echo "<p class='error'>$error</p>";
         }
     }
 }
@@ -31,40 +30,38 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <title>Form</title>
-        <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="">
+        <link rel="stylesheet" href="style.css">
     </head>
     <body>
-        <h2>APOD form</h2>
-        <form method="POST">
-            <p>Select a lookup method:</p>
+        <div class="container">
+            <h2>APOD form</h2>
+            <form method="POST">
+                <h4>Select a lookup method:</h4>
+                <div class="divider">
+                    <input type="radio" class="radio" name="radio_choice" value="from_to"><br><br>
+                    <label for="radio_choice">Select period between two dates. </label>
+                    <label for="period_from">Starting period: </label>
+                    <input type="date" id="period_from" name="period_from"><br>
 
-            <input type="radio" id="radio_from_to" name="radio_choice" value="from_to">Select period between two dates.<br>
-            <input type="radio" id="radio_start_date" name="radio_choice" value="start_date">Select starting date and duration.<br><br>
+                    <label for="period">End period: </label>
+                    <input type="date" id="period_to" name="period_to"><br><br>
+                </div>
+                <div class="divider">
+                <input type="radio" class="radio" name="radio_choice" value="start_date"><br><br>
+                    <label for="radio_choice">Select starting date and duration. </label>
+                    <label for="start_date">Starting date: </label>
+                    <input type="date" id="start_date" name="start_date"><br>
 
-            <div>
-                <label for="period_from">Starting period:</label>
-                <input type="date" id="period_from" name="period_from"><br>
-
-                <label for="period">End period:</label>
-                <input type="date" id="period_to" name="period_to"><br><br>
-            </div>       
-            
-            <div>
-                <label for="start_date">Starting date:</label>
-                <input type="date" id="start_date" name="start_date"><br>
-
-                <label for="duration">Duration (days):</label>
-                <input type="text" id="duration" name="duration"><br><br>
-            </div>
-
-            <input type="submit" value="Submit">
-        </form>
+                    <label for="duration">Duration (days): </label>
+                    <input type="text" id="duration" name="duration"><br><br>
+                </div>
+                <input id="submit" type="submit" value="Submit">
+            </form>
+        </div>
     </body>
 </html>
