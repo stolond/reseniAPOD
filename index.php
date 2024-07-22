@@ -11,19 +11,24 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $time_from = $_POST["period_from"];
         $time_to = $_POST["period_to"];
 
-        echo "<p class='valid'>Form is valid.</p><br>";
+        //echo "<p class='valid'>Form is valid.</p><br>";
 
-        $req = new Request();
-        $limits = $req->exec_request($time_from, $time_to);
-
-        echo "<h4>Request limit: " . $limits[0] . " per hour</h4>";
-        echo "<h4>Remaining requests: " . $limits[1]. "</h4>";
-
+        $req = new Request($time_from, $time_to);
+        $limits = $req->exec_request();
+        
     } else {
         $errors = $validator->get_errors();
         foreach ($errors as $field => $error) {
             echo "<p class='error'>$error</p>";
         }
+    }
+
+    if (isset($limits)) {
+        echo "<h4>Request limit: " . $limits[0] . " per hour</h4>";
+        echo "<h4>Remaining requests: " . $limits[1] . "</h4>";
+    } else {
+        echo "<h4>Request limit: ~2000 per hour</h4>";
+        echo "<h4>Remaining requests: ?</h4>";
     }
 }
 
