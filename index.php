@@ -8,8 +8,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $validator = new Form($_POST);
     if ($validator->validate_form()) {
 
-        $time_from = $_POST["period_from"];
-        $time_to = $_POST["period_to"];
+        if ($_POST["radio_choice"] === "start_date") {
+            $calc_date = $validator->calculate_date();
+
+            if (is_string($calc_date)) {
+                $time_from = $_POST["start_date"];
+                $time_to = $calc_date;
+            }
+        } else {
+            $time_from = $_POST["period_from"];
+            $time_to = $_POST["period_to"];
+        }
 
         //echo "<p class='valid'>Form is valid.</p><br>";
 

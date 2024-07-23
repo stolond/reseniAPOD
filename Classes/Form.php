@@ -26,17 +26,17 @@ Class Form
     {
         if (empty($this->data["radio_choice"])) 
         {
-            $this->errors = "Please select a lookup method.";
+            $this->errors["radio_choice"] = "Please select a lookup method.";
         }
     }
 
     private function validate_from_to() {
         if (empty($this->data["period_from"])) {
-            $this->errors = "Starting period is required.";
+            $this->errors["period_from"] = "Starting period is required.";
         }
 
         if (empty($this->data["period_to"])) {
-            $this->errors = "End period is required.";
+            $this->errors["period_to"] = "End period is required.";
         }
 
         if (!empty($this->data["period_from"]) && !empty($this->data["period_to"])) {
@@ -44,47 +44,41 @@ Class Form
             $to_date = $this->string_to_date("period_to");
 
             if ($from_date && $to_date && $from_date > $to_date) {
-                $this->errors = "Starting period must be earlier than end period.";
+                $this->errors["period_to"] = "Starting period must be earlier than end period.";
             }
 
             if ($this->data["period_to"] > date("Y-m-d")) {
-                $this->errors = "Date cannot be set to the future.";
+                $this->errors["period_to"] = "Date cannot be set to the future.";
             }
         }
     }
 
     private function validate_start_date() {
         if (empty($this->data["start_date"])) {
-            $this->errors = "Starting date is required.";
+            $this->errors["start_date"] = "Starting date is required.";
         }
 
         if (empty($this->data["duration"])) {
-            $this->errors = "Duration is required.";
+            $this->errors["duration"] = "Duration is required.";
         } 
 
         if (!empty($this->data["start_date"]) && !empty($this->data["duration"])) {
-
-            
             if (!ctype_digit($this->data["duration"]) || (int)$this->data["duration"] <= 0) {
-                $this->errors = "Duration must be a positive integer.";
+                $this->errors["duration"] = "Duration must be a positive integer.";
+            } elseif ($this->calculate_date() > date("Y-m-d")){
+                $this->errors["duration"] = "Date cannot be set to the future.";
             }
-
-            $this->calculate_date();
-        } 
+        }
     }
 
-    private function calculate_date(){
+    public function calculate_date() {
         $date = $this->string_to_date("start_date");
         $duration = $this->data["duration"];
 
         $date->modify("+ " . $duration . " days");
         $date_to = $date->format("Y-m-d");
-
-        if($date_to > date("Y-m-d")){
-            $this->errors = "Date cannot be set to the future.";
-        } else {
-            return $date_to;
-        }
+        
+        return $date_to;
     }
 
     private function string_to_date($data) {
