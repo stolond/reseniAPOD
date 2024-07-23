@@ -48,13 +48,13 @@ Class Request
                 if (!is_array($record)) {
                     throw new Exception("API returned an error.");
                 } else {
+                    $filtered_data = array_intersect_key($record, array_flip($headers));
+
                     // if file doesnt exist, add headers
                     if (ftell($file) == 0) {
                         fputcsv($file, $headers);
                     }
 
-                    $filtered_data = array_intersect_key($record, array_flip($headers));
-                    
                     if (fputcsv($file, $filtered_data) === false) {
                         throw new Exception("Error writing to file.");
                     }

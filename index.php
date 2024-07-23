@@ -15,7 +15,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $time_from = $_POST["start_date"];
                 $time_to = $calc_date;
             }
-        } else {
+        } elseif (($_POST["radio_choice"] === "from_to"))  {
             $time_from = $_POST["period_from"];
             $time_to = $_POST["period_to"];
         }
@@ -33,12 +33,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     if (isset($limits)) {
-        echo "<h4>Request limit: " . $limits[0] . " per hour</h4>";
-        echo "<h4>Remaining requests: " . $limits[1] . "</h4>";
+        $max_requests = "<h4>Request limit: " . $limits[0] . " per hour</h4>";
+        $requests_remaining = "<h4>Remaining requests: " . $limits[1] . "</h4>";
+
+        echo $max_requests;
+        echo $requests_remaining;
     } else {
         echo "<h4>Request limit: ~2000 per hour</h4>";
         echo "<h4>Remaining requests: ?</h4>";
     }
+
+} else {
+    echo "<h4>Request limit: ~2000 per hour</h4>";
+    echo "<h4>Remaining requests: ?</h4>";
 }
 
 ?>
